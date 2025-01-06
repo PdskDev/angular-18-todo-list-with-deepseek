@@ -14,6 +14,7 @@ import { FormsModule } from '@angular/forms';
 export class TodoComponent {
   todos: Todo[] = [];
   newTodoTitle = '';
+  title = 'Todo List';
 
   constructor(private todoService: TodoService) {}
 
