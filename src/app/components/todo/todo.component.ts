@@ -19,23 +19,41 @@ export class TodoComponent {
   constructor(private todoService: TodoService) {}
 
   ngOnInit(): void {
-    this.todos = this.todoService.getAllTodos();
+    this.loadTodos();
+  }
+
+  loadTodos(): void {
+    this.todoService.getAllTodos().subscribe({
+      next: (todos) => (this.todos = todos),
+      error: (err) => console.error('Error loading todos:', err),
+    });
   }
 
   addTodo(): void {
     if (this.newTodoTitle.trim()) {
-      this.todoService.addTodo(this.newTodoTitle);
-      this.newTodoTitle = '';
-      this.todos = this.todoService.getAllTodos();
+      this.todoService.addTodo(this.newTodoTitle).subscribe({
+        next: () => {
+          this.newTodoTitle = '';
+          this.loadTodos();
+        },
+        error: (err) => console.error('Error adding todo:', err),
+      });
     }
   }
 
   toggleComplete(todo: Todo): void {
-    this.todoService.updateTodo(todo.id, { completed: !todo.completed });
+    this.todoService
+      .updateTodo(todo._id, { completed: !todo.completed })
+      .subscribe({
+        next: () => this.loadTodos(),
+        error: (err) => console.error('Error updating todo:', err),
+      });
   }
 
-  deleteTodo(id: number): void {
-    this.todoService.deleteTodo(id);
-    this.todos = this.todoService.getAllTodos();
+  deleteTodo(id: string): void {
+    this.todoService.deleteTodo(id).subscribe({
+      next: () => this.loadTodos(),
+      error: (err) => console.error('Error deleting todo:', err),
+    });
   }
 }

@@ -1,7 +1,9 @@
+import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
 
 export interface Todo {
-  id: number;
+  _id: string;
   title: string;
   completed: boolean;
 }
@@ -10,38 +12,23 @@ export interface Todo {
   providedIn: 'root',
 })
 export class TodoService {
-  private todos: Todo[] = [];
-  private lastId = 0;
+  private apiUrl = 'http://localhost:3000/api/todos';
 
-  constructor() {}
+  constructor(private http: HttpClient) {}
 
-  getAllTodos(): Todo[] {
-    return this.todos;
+  getAllTodos(): Observable<Todo[]> {
+    return this.http.get<Todo[]>(this.apiUrl);
   }
 
-  getTodoById(id: number): Todo | undefined {
-    return this.todos.find((todo) => todo.id === id);
+  addTodo(title: string): Observable<Todo> {
+    return this.http.post<Todo>(this.apiUrl, { title: title });
   }
 
-  addTodo(title: string): Todo {
-    const newTodo: Todo = {
-      id: ++this.lastId,
-      title,
-      completed: false,
-    };
-    this.todos.push(newTodo);
-    return newTodo;
+  updateTodo(id: string, changes: Partial<Todo>): Observable<Todo> {
+    return this.http.patch<Todo>(`${this.apiUrl}/${id}`, changes);
   }
 
-  updateTodo(id: number, changes: Partial<Todo>): Todo | undefined {
-    const todo = this.getTodoById(id);
-    if (todo) {
-      Object.assign(todo, changes);
-    }
-    return todo;
-  }
-
-  deleteTodo(id: number): void {
-    this.todos = this.todos.filter((todo) => todo.id !== id);
+  deleteTodo(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }
